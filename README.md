@@ -295,8 +295,8 @@ graph TB
     end
     
     subgraph "Next.js Server"
-        Widget[/widget ページ]
-        ChatAPI[/api/chat]
+        Widget[widget ページ]
+        ChatAPI[api/chat]
         Client[TeraoNaviClient]
     end
     
