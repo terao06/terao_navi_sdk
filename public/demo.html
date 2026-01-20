@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>terao-navi チャット - デモページ</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        margin: 0;
+        padding: 40px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+      }
+      
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      }
+      
+      h1 {
+        color: #333;
+        margin-top: 0;
+      }
+      
+      .description {
+        color: #666;
+        line-height: 1.6;
+        margin-bottom: 30px;
+      }
+      
+      .code-block {
+        background: #f5f5f5;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 20px;
+        margin: 20px 0;
+        overflow-x: auto;
+      }
+      
+      code {
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
+        color: #e01a76;
+      }
+      
+      .note {
+        background: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 15px;
+        margin: 20px 0;
+        border-radius: 4px;
+      }
+      
+      .success {
+        background: #d4edda;
+        border-left: 4px solid #28a745;
+        padding: 15px;
+        margin: 20px 0;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🤖 terao-navi チャットウィジェット デモ</h1>
+      
+      <div class="description">
+        <p>このページは、外部HTMLから簡単に組み込める terao-navi チャットウィジェットのデモです。</p>
+        <p>右下のチャットアイコンをクリックして、AIとの会話を始めてください!</p>
+      </div>
+      
+      <div class="success">
+        <strong>✓ チャットウィジェットが正常に読み込まれています</strong>
+      </div>
+      
+      <h2>📝 実装方法</h2>
+      
+      <p>あなたのHTMLファイルに以下のコードを追加するだけで、このチャットウィジェットを組み込めます：</p>
+      
+      <div class="code-block">
+        <code>
+          &lt;div id="terao-navi-chat"&gt;&lt;/div&gt;<br>
+          &lt;script<br>
+          &nbsp;&nbsp;src="http://localhost:3000/chat.js"<br>
+          &nbsp;&nbsp;data-credential="Base64エンコード済みの認証情報"<br>
+          &gt;&lt;/script&gt;
+        </code>
+      </div>
+      
+      <div class="note">
+        <strong>注意:</strong> 
+        <ul style="margin: 10px 0 0 0; padding-left: 20px;">
+          <li><code>data-credential</code> 属性には、Base64エンコード済みの認証情報を設定してください</li>
+          <li>形式: btoa("clientId:clientSecret") の結果</li>
+          <li>本番環境では、<code>localhost:3000</code> を実際のドメインに置き換えてください</li>
+          <li>Terao Navi APIと連携して質問応答を提供します</li>
+          <li>ウィジェットのorigin/refererは自動取得されます（サーバー側で検証）</li>
+        </ul>
+      </div>
+      
+      <h2>🎨 機能</h2>
+      <ul style="line-height: 1.8; color: #666;">
+        <li>✨ レスポンシブデザイン</li>
+        <li>💬 リアルタイムチャット</li>
+        <li>🎭 タイピングインジケーター</li>
+        <li>📱 最小化/最大化機能</li>
+        <li>🔒 認証情報のサポート</li>
+        <li>⚡ 軽量で高速</li>
+        <li>⚛️ <strong>Next.js + Reactで実装</strong></li>
+        <li>🧩 <strong>コンポーネント化された設計</strong></li>
+      </ul>
+      
+      <h2>🏗️ アーキテクチャ</h2>
+      <p>このチャットウィジェットは、モダンなアーキテクチャで設計されています：</p>
+      <ul style="line-height: 1.8; color: #666;">
+        <li><strong>chat.js</strong> - 軽量なローダー（外部サイトに読み込まれる）</li>
+        <li><strong>Next.js</strong> - サーバーサイドレンダリングとAPIルート</li>
+        <li><strong>React (JSX)</strong> - コンポーネント化されたUI</li>
+        <li><strong>iframe</strong> - セキュアな分離環境</li>
+      </ul>
+      
+      <h2>📦 コンポーネント構成</h2>
+      <div class="code-block">
+        <code>
+          components/<br>
+          &nbsp;&nbsp;├── ChatWidget.jsx&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# メインコンテナ<br>
+          &nbsp;&nbsp;├── ChatHeader.jsx&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# ヘッダー（最小化ボタン付き）<br>
+          &nbsp;&nbsp;├── ChatMessages.jsx&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# メッセージリスト<br>
+          &nbsp;&nbsp;├── ChatMessage.jsx&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# 個別メッセージ<br>
+          &nbsp;&nbsp;├── ChatInput.jsx&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# 入力フィールド<br>
+          &nbsp;&nbsp;└── TypingIndicator.jsx&nbsp;# タイピングアニメーション
+        </code>
+      </div>
+      
+      <h2>🚀 カスタマイズ</h2>
+      <p>ウィジェットの色、サイズ、位置などは、<code>chat.js</code> ファイル内のCSSを編集することで簡単にカスタマイズできます。</p>
+    </div>
+    
+    <!-- terao-navi チャットウィジェットを組み込む -->
+    <div id="terao-navi-chat"></div>
+    <script
+      src="http://localhost:3000/chat.js"
+      data-credential="ZmY4YTMyZDRjODRmOTc5YjQ3YmVkOTE3OTI0OTJkNzE6NjczNDlhNjEzZTE5MDUxOGI4YjZmMGM5MWQ3ZTllZTQwMWVkYTIxZTI0Y2M2OTk5YzE5MTc0MzI3ODc2ZTI1Yg=="
+      data-chat-title="teraid chatへ質問する"
+      data-chat-color="#ea6666ff"
+    ></script>
+  </body>
+</html>
