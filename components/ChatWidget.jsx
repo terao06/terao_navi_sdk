@@ -17,6 +17,12 @@ export default function ChatWidget({ credential, origin = '', referer = '', chat
   ]);
   const [isTyping, setIsTyping] = useState(false);
 
+  useEffect(() => {
+    if (window.parent !== window) {
+      window.parent.postMessage({ type: 'widget-loaded' }, '*');
+    }
+  }, []);
+
   const toggleMinimize = () => {
     setIsMinimized(!isMinimized);
   };

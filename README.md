@@ -71,6 +71,7 @@ npm run dev
   data-credential="YOUR_BASE64_ENCODED_CREDENTIAL"
   data-chat-title="AIチャットへ質問する"
   data-chat-color="#667eea"
+  data-preview="false"
 ></script>
 ```
 
@@ -126,6 +127,22 @@ npm run dev
   data-credential="YOUR_BASE64_ENCODED_CREDENTIAL"
   data-chat-title="お困りですか？"
   data-chat-color="#667eea"
+  data-preview="false"
+></script>
+```
+
+**プレビューモードでの使用（親要素内に表示）:**
+
+```html
+<!-- チャットウィジェットを表示するコンテナ -->
+<div id="terao-navi-chat" style="width: 100%; max-width: 800px; margin: 0 auto;"></div>
+
+<script
+  src="http://localhost:3000/chat.js"
+  data-credential="YOUR_BASE64_ENCODED_CREDENTIAL"
+  data-chat-title="AIチャット（プレビュー）"
+  data-chat-color="#667eea"
+  data-preview="true"
 ></script>
 ```
 
@@ -137,6 +154,7 @@ npm run dev
 | `data-credential` | ✓ | Base64エンコード済みの認証情報（clientId:clientSecret） | - |
 | `data-chat-title` | - | チャットウィンドウのヘッダータイトル | `''` |
 | `data-chat-color` | - | チャットウィンドウのテーマカラー（16進数カラーコード） | `'#667eea'` |
+| `data-preview` | - | プレビューモード。`true`の場合、親要素内に相対配置、`false`の場合は画面右下に固定配置 | `'false'` |
 
 ## 認証情報の設定
 

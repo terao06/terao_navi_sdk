@@ -15,18 +15,43 @@
   const credential = currentScript.getAttribute('data-credential') || ''; // Base64(clientId:clientSecret)
   const chatTitle = currentScript.getAttribute('data-chat-title') || '';
   const chatColor = currentScript.getAttribute('data-chat-color') || '';
+  const isPreview = currentScript.getAttribute('data-preview') === 'true'; // プレビューモード
   const baseUrl = currentScript.src.replace('/chat.js', '');
   const pageOrigin = window.location.origin; // 自動取得（改ざん防止のためサーバー側で検証）
   const pageUrl = window.location.href; // フルURL（Refererとして使用）
 
-  // iframeのスタイル
-  const styles = `
+  // iframeのスタイル（プレビューモードと通常モードで切り替え）
+  const styles = isPreview ? `
+    .terao-navi-chat-container {
+      position: relative;
+      width: 100%;
+      height: 500px;
+      max-height: 80vh;
+      z-index: 1;
+      overflow: auto;
+    }
+
+    .terao-navi-chat-iframe {
+      width: 100%;
+      height: 640px;
+      min-height: 640px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      background: white;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .terao-navi-chat-iframe.loaded {
+      opacity: 1;
+    }
+  ` : `
     .terao-navi-chat-container {
       position: fixed;
       bottom: 0;
       right: 0;
-      width: 100vw;
-      height: 100vh;
+      width: 440px;
+      height: 640px;
       pointer-events: none;
       z-index: 9999;
     }
@@ -37,6 +62,12 @@
       border: none;
       background: transparent;
       pointer-events: auto;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .terao-navi-chat-iframe.loaded {
+      opacity: 1;
     }
   `;
 
@@ -47,11 +78,12 @@
 
   // DOMが読み込まれたら実行
   function init() {
-    // ターゲット要素を探す
-    const targetElement = document.getElementById('terao-navi-chat');
+    // ターゲット要素を探す（なければ自動生成）
+    let targetElement = document.getElementById('terao-navi-chat');
     if (!targetElement) {
-      console.error('Error: #terao-navi-chat element not found');
-      return;
+      targetElement = document.createElement('div');
+      targetElement.id = 'terao-navi-chat';
+      document.body.appendChild(targetElement);
     }
 
     // iframeを作成
@@ -78,6 +110,28 @@
     // ターゲット要素に挿入
     targetElement.appendChild(container);
 
+    // プレビューモードの場合、コンテナを最下部にスクロール
+    if (isPreview) {
+      const scrollToBottom = () => {
+        container.scrollTop = container.scrollHeight;
+      };
+      
+      // 初期スクロール
+      setTimeout(scrollToBottom, 100);
+    }
+
+    // iframe読み込み完了時に表示
+    iframe.addEventListener('load', () => {
+      // 少し遅延させてから表示（ウィジェット内部の初期化を待つ）
+      setTimeout(() => {
+        iframe.classList.add('loaded');
+        // プレビューモードの場合、再度スクロール
+        if (isPreview) {
+          container.scrollTop = container.scrollHeight;
+        }
+      }, 100);
+    });
+
     // メッセージイベントリスナー（将来の拡張用）
     window.addEventListener('message', (event) => {
       // セキュリティチェック
@@ -88,6 +142,7 @@
       // ウィジェットからのメッセージを処理
       if (event.data.type === 'widget-loaded') {
         console.log('[Terao Navi SDK] Widget loaded successfully');
+        iframe.classList.add('loaded');
       }
     });
   }
