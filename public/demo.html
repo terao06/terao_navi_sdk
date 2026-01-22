@@ -87,7 +87,7 @@
           &lt;div id="terao-navi-chat"&gt;&lt;/div&gt;<br>
           &lt;script<br>
           &nbsp;&nbsp;src="http://localhost:3000/chat.js"<br>
-          &nbsp;&nbsp;data-credential="Base64エンコード済みの認証情報"<br>
+          &nbsp;&nbsp;data-company-id="あなたの企業ID"<br>
           &gt;&lt;/script&gt;
         </code>
       </div>
@@ -95,8 +95,8 @@
       <div class="note">
         <strong>注意:</strong> 
         <ul style="margin: 10px 0 0 0; padding-left: 20px;">
-          <li><code>data-credential</code> 属性には、Base64エンコード済みの認証情報を設定してください</li>
-          <li>形式: btoa("clientId:clientSecret") の結果</li>
+          <li><code>data-company-id</code> 属性には、企業IDを設定してください</li>
+          <li>形式: 整数または文字列の企業ID</li>
           <li>本番環境では、<code>localhost:3000</code> を実際のドメインに置き換えてください</li>
           <li>Terao Navi APIと連携して質問応答を提供します</li>
           <li>ウィジェットのorigin/refererは自動取得されます（サーバー側で検証）</li>
@@ -144,7 +144,7 @@
     <!-- terao-navi チャットウィジェットを組み込む -->
     <script
       src="http://localhost:3000/chat.js"
-      data-credential="ZmY4YTMyZDRjODRmOTc5YjQ3YmVkOTE3OTI0OTJkNzE6NjczNDlhNjEzZTE5MDUxOGI4YjZmMGM5MWQ3ZTllZTQwMWVkYTIxZTI0Y2M2OTk5YzE5MTc0MzI3ODc2ZTI1Yg=="
+      data-company-id=1
       data-chat-title="teraid chatへ質問する"
       data-chat-color="#ea6666ff"
     ></script>

@@ -1,19 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { TeraoNaviClient } from '@/lib/api/teraoNaviClient';
 
-// Terao Navi APIクライアントのキャッシュ（credential毎）
+// Terao Navi APIクライアントのキャッシュ（company_id毎）
 const clientCache = new Map<string, TeraoNaviClient>();
 
 /**
  * Terao Navi APIクライアントを取得（キャッシュ対応）
- * @param credential Base64エンコードされた "clientId:clientSecret"
+ * @param company_id 企業ID
  * @param origin 埋め込み元のorigin
  * @param referer 埋め込み元のフルURL
  */
-function getTeraoNaviClient(credential: string, origin?: string, referer?: string): TeraoNaviClient {
+function getTeraoNaviClient(company_id: string, origin?: string, referer?: string): TeraoNaviClient {
   // キャッシュをチェック
-  if (clientCache.has(credential)) {
-    const client = clientCache.get(credential)!;
+  if (clientCache.has(company_id)) {
+    const client = clientCache.get(company_id)!;
     // originとrefererを更新
     if (origin) {
       client.setOrigin(origin);
@@ -24,28 +24,28 @@ function getTeraoNaviClient(credential: string, origin?: string, referer?: strin
     return client;
   }
 
-  // credentialをそのまま使用するクライアントを作成
+  // company_idを使用するクライアントを作成
   const client = new TeraoNaviClient({
-    credential: credential, // Base64エンコード済み
+    company_id: company_id,
     origin: origin,
     referer: referer,
     autoRefresh: true,
   });
 
   // キャッシュに保存
-  clientCache.set(credential, client);
+  clientCache.set(company_id, client);
 
   return client;
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const { message, credential, origin, referer, application_id } = await request.json();
+    const { message, company_id, origin, referer, application_id } = await request.json();
 
-    // バリデーション - credential
-    if (!credential || typeof credential !== 'string') {
+    // バリデーション - company_id
+    if (!company_id || typeof company_id !== 'string') {
       return NextResponse.json(
-        { error: '認証情報が必要です' },
+        { error: '企業IDが必要です' },
         { status: 401 }
       );
     }
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Terao Navi APIクライアントを取得
-    const client = getTeraoNaviClient(credential, origin, referer);
+    const client = getTeraoNaviClient(company_id, origin, referer);
 
     // Terao Navi APIに質問を送信
     const response = await client.ask({

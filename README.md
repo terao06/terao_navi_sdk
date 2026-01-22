@@ -68,9 +68,9 @@ npm run dev
 <!-- ウィジェットを読み込むスクリプト -->
 <script
   src="http://localhost:3000/chat.js"
-  data-credential="YOUR_BASE64_ENCODED_CREDENTIAL"
-  data-chat-title="AIチャットへ質問する"
-  data-chat-color="#667eea"
+  data-company-id="1"
+  data-chat-title="teraid chatへ質問する"
+  data-chat-color="#ea6666ff"
   data-preview="false"
 ></script>
 ```
@@ -113,7 +113,9 @@ npm run dev
   <div id="terao-navi-chat"></div>
   <script
     src="http://localhost:3000/chat.js"
-    data-credential="YOUR_BASE64_ENCODED_CREDENTIAL"
+    data-company-id="1"
+    data-chat-title="teraid chatへ質問する"
+    data-chat-color="#ea6666ff"
   ></script>
 </body>
 </html>
@@ -124,9 +126,9 @@ npm run dev
 ```html
 <script
   src="https://your-domain.com/chat.js"
-  data-credential="YOUR_BASE64_ENCODED_CREDENTIAL"
-  data-chat-title="お困りですか？"
-  data-chat-color="#667eea"
+  data-company-id="1"
+  data-chat-title="teraid chatへ質問する"
+  data-chat-color="#ea6666ff"
   data-preview="false"
 ></script>
 ```
@@ -139,9 +141,9 @@ npm run dev
 
 <script
   src="http://localhost:3000/chat.js"
-  data-credential="YOUR_BASE64_ENCODED_CREDENTIAL"
-  data-chat-title="AIチャット（プレビュー）"
-  data-chat-color="#667eea"
+  data-company-id="1"
+  data-chat-title="teraid chatへ質問する"
+  data-chat-color="#ea6666ff"
   data-preview="true"
 ></script>
 ```
@@ -151,61 +153,29 @@ npm run dev
 | 属性 | 必須 | 説明 | デフォルト値 |
 |------|------|------|-------------|
 | `src` | ✓ | ウィジェットのJSファイルのURL | - |
-| `data-credential` | ✓ | Base64エンコード済みの認証情報（clientId:clientSecret） | - |
-| `data-chat-title` | - | チャットウィンドウのヘッダータイトル | `''` |
-| `data-chat-color` | - | チャットウィンドウのテーマカラー（16進数カラーコード） | `'#667eea'` |
+| `data-company-id` | ✓ | 会社ID（数値） | - |
+| `data-chat-title` | - | チャットウィンドウのヘッダータイトル | `'teraid chatへ質問する'` |
+| `data-chat-color` | - | チャットウィンドウのテーマカラー（16進数カラーコード） | `'#ea6666ff'` |
 | `data-preview` | - | プレビューモード。`true`の場合、親要素内に相対配置、`false`の場合は画面右下に固定配置 | `'false'` |
 
-## 認証情報の設定
+## 設定
 
-### `data-credential` について
+### `data-company-id` について
 
-`data-credential` 属性には、Terao Navi APIの **clientId** と **clientSecret** をコロン（`:`）で連結し、Base64エンコードした文字列を設定します。
+`data-company-id` 属性には、Terao Navi APIで登録された会社IDを数値で設定します。
 
-**フォーマット:**
-```
-Base64エンコード(clientId:clientSecret)
-```
+会社IDは以下のGitHub画面から発行できます（詳しくはリポジトリを確認してください）：
 
-#### 生成方法
+**https://github.com/terao06/terao_navi_web**
 
-**JavaScript（ブラウザコンソール）:**
-```javascript
-// clientIdとclientSecretを取得後
-const clientId = "your_client_id";
-const clientSecret = "your_client_secret";
-const credential = btoa(`${clientId}:${clientSecret}`);
-console.log(credential);
-```
-
-**Node.js:**
-```javascript
-const clientId = "your_client_id";
-const clientSecret = "your_client_secret";
-const credential = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
-console.log(credential);
-```
-
-**コマンドライン（PowerShell）:**
-```powershell
-$clientId = "your_client_id"
-$clientSecret = "your_client_secret"
-$credential = "${clientId}:${clientSecret}"
-[Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($credential))
-```
-
-**コマンドライン（Bash/Linux/Mac）:**
-```bash
-echo -n "your_client_id:your_client_secret" | base64
-```
+この値はHTML上に公開されますが、サーバー側でドメイン制限やその他のセキュリティ対策が実施されています。
 
 #### セキュリティ上の注意
 
 **⚠️ 重要:** 
-- 認証情報（credential）はHTMLソースコードに埋め込まれるため、**クライアント側で確認可能**です
-- Terao Navi APIのサーバー側で、**origin/refererによるドメイン制限**を設定することを強く推奨します
-- 本番環境では、**サーバーサイドプロキシの実装**も検討してください
-- credentialが漏洩した場合は、速やかにclientSecretを再発行してください
+- 会社IDはHTMLソースコードに埋め込まれるため、**クライアント側で確認可能**です
+- Terao Navi APIのサーバー側で、**origin/refererによるドメイン制限**が設定されています
+- 本番環境では、**サーバーサイドでの追加のセキュリティ対策**も実施されます
 
 ### 認証フロー
 
@@ -245,8 +215,9 @@ sequenceDiagram
 ```html
 <script
   src="http://localhost:3000/chat.js"
-  data-credential="YOUR_CREDENTIAL"
-  data-chat-color="#ff6b6b"
+  data-company-id="1"
+  data-chat-title="teraid chatへ質問する"
+  data-chat-color="#ea6666ff"
 ></script>
 ```
 
@@ -383,7 +354,7 @@ API側の詳細な仕様については、以下のリポジトリで確認で�
 ```json
 {
   "message": "質問内容",
-  "credential": "Base64エンコード済みの認証情報",
+  "company_id": 1,
   "origin": "埋め込み元のorigin",
   "referer": "埋め込み元のフルURL",
   "application_id": 1
@@ -493,7 +464,7 @@ import { TeraoNaviClient } from '@/lib/api/teraoNaviClient';
 
 // クライアントインスタンスを作成
 const client = new TeraoNaviClient({
-  credential: 'BASE64_ENCODED_CREDENTIAL',  // Base64(clientId:clientSecret)
+  company_id: 1,                            // 会社ID
   origin: 'https://example.com',            // 埋め込み元のorigin
   referer: 'https://example.com/page',      // 埋め込み元のフルURL
   autoRefresh: true,                        // トークン自動更新を有効化
@@ -518,7 +489,7 @@ try {
   console.log(response.data.answer);
 } catch (error) {
   if (error.response?.status === 401) {
-    console.error('認証エラー: credentialを確認してください');
+    console.error('認証エラー: company_idを確認してください');
   } else if (error.response?.status === 429) {
     console.error('レート制限: しばらく待ってから再試行してください');
   } else {

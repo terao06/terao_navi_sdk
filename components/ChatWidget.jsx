@@ -5,7 +5,7 @@ import ChatHeader from './ChatHeader';
 import ChatMessages from './ChatMessages';
 import ChatInput from './ChatInput';
 
-export default function ChatWidget({ credential, origin = '', referer = '', chatTitle = '', chatColor = '' }) {
+export default function ChatWidget({ company_id, origin = '', referer = '', chatTitle = '', chatColor = '' }) {
   const [isMinimized, setIsMinimized] = useState(true);
   const [messages, setMessages] = useState([
     {
@@ -61,7 +61,7 @@ export default function ChatWidget({ credential, origin = '', referer = '', chat
         },
         body: JSON.stringify({
           message: messageText,
-          credential: credential,
+          company_id: company_id,
           origin: origin, // 自動取得されたorigin
           referer: referer, // フルURL
         }),

@@ -3,18 +3,17 @@
  * 外部HTMLから読み込まれる軽量なローダースクリプト
  * Next.jsで実装されたReactコンポーネントをiframeで埋め込む
  * 
- * data-credential: Base64エンコードされた "clientId:clientSecret"
- * Basic認証ヘッダーにそのまま使用される
- * 例: btoa("your_client_id:your_client_secret") の結果
+ * data-company-id: 企業ID
+ * 企業を識別するためのID
  */
 (function () {
   'use strict';
 
   // スクリプトタグから設定を取得
   const currentScript = document.currentScript;
-  const credential = currentScript.getAttribute('data-credential') || ''; // Base64(clientId:clientSecret)
-  const chatTitle = currentScript.getAttribute('data-chat-title') || '';
-  const chatColor = currentScript.getAttribute('data-chat-color') || '';
+  const company_id = currentScript.getAttribute('data-company-id') || ''; // 企業ID
+  const chatTitle = currentScript.getAttribute('data-chat-title') || ''; // チャットタイトル
+  const chatColor = currentScript.getAttribute('data-chat-color') || ''; // チャット色
   const isPreview = currentScript.getAttribute('data-preview') === 'true'; // プレビューモード
   const baseUrl = currentScript.src.replace('/chat.js', '');
   const pageOrigin = window.location.origin; // 自動取得（改ざん防止のためサーバー側で検証）
@@ -89,7 +88,7 @@
     // iframeを作成
     const iframe = document.createElement('iframe');
     const params = new URLSearchParams({
-      credential: credential,
+      company_id: company_id,
       origin: pageOrigin, // 自動取得されたorigin
       referer: pageUrl, // フルURL
     });

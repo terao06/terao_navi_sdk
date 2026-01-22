@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import ChatWidget from '@/components/ChatWidget';
 
 export default function WidgetPage() {
-  const [credential, setCredential] = useState('');
+  const [company_id, setCompanyId] = useState('');
   const [origin, setOrigin] = useState('');
   const [referer, setReferer] = useState('');
   const [chatTitle, setChatTitle] = useState('');
@@ -20,12 +20,13 @@ export default function WidgetPage() {
     
     // URLパラメータから設定を取得
     const params = new URLSearchParams(window.location.search);
-    const cred = params.get('credential') || '';
-    const orig = params.get('origin') || '';
-    const ref = params.get('referer') || '';
+    // 直接アクセス時のデフォルト値を設定（開発/テスト用）
+    const compId = params.get('company_id') || 1;
+    const orig = params.get('origin') || window.location.origin;
+    const ref = params.get('referer') || window.location.href;
     const title = params.get('chatTitle') || '';
     const color = params.get('chatColor') || '';
-    setCredential(cred);
+    setCompanyId(compId);
     setOrigin(orig);
     setReferer(ref);
     setChatTitle(title);
@@ -45,7 +46,7 @@ export default function WidgetPage() {
   return (
     <div style={styles.container}>
       <ChatWidget 
-        credential={credential}
+        company_id={company_id}
         origin={origin}
         referer={referer}
         chatTitle={chatTitle}

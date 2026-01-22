@@ -70,7 +70,7 @@ interface TokenInfo {
  * クライアント設定
  */
 interface TeraoNaviClientConfig {
-  credential?: string; // Base64エンコード済みの "clientId:clientSecret"
+  company_id?: string; // 企業ID
   origin?: string; // 埋め込み元のorigin
   referer?: string; // 埋め込み元のフルURL
   autoRefresh?: boolean;
@@ -96,7 +96,7 @@ interface TeraoNaviClientConfig {
  */
 export class TeraoNaviClient {
   private baseUrl: string;
-  private credential: string; // Base64エンコード済みの認証情報
+  private company_id: string; // 企業ID
   private origin: string; // 埋め込み元のorigin
   private referer: string; // 埋め込み元のフルURL
   private autoRefresh: boolean;
@@ -105,8 +105,8 @@ export class TeraoNaviClient {
   constructor(config: TeraoNaviClientConfig) {
     this.baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
     
-    // credentialが指定されている場合はそれを使用、なければclientIdとclientSecretをエンコード
-    this.credential = config.credential || "";
+    // company_idが指定されている場合はそれを使用
+    this.company_id = config.company_id || "";
     this.origin = config.origin || "";
     this.referer = config.referer || "";
     
@@ -143,16 +143,16 @@ export class TeraoNaviClient {
    * @throws Error 認証失敗時
    */
   async authenticate(): Promise<TokenResponse> {
-    if (!this.credential) {
-      throw new Error('認証情報が設定されていません');
+    if (!this.company_id) {
+      throw new Error('企業IDが設定されていません');
     }
 
-    // Basic認証ヘッダー（credentialは既にBase64エンコード済み）
-    const authHeader = `Basic ${this.credential}`;
+    // 企業IDをヘッダーに含める
+    const authHeader = `Bearer ${this.company_id}`;
 
     // ヘッダーを構築
     const headers: Record<string, string> = {
-      'Authorization': authHeader,
+      'X-Company-Id': this.company_id,
       'Content-Type': 'application/json',
     };
 
@@ -174,6 +174,7 @@ export class TeraoNaviClient {
 
       if (!response.ok) {
         const errorData = await response.json() as ErrorResponse;
+        console.log("hogehoaaaaaaaaaaaaaaaaaaaaaaaage");
         throw new Error(
           `認証に失敗しました (${response.status}): ${errorData.message || '不明なエラー'}`
         );
