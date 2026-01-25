@@ -1,540 +1,172 @@
 # Terao Navi SDK
 
-**AIチャットウィジェット** - 外部HTMLに簡単に組み込めるチャットウィジェットSDK
+**AIチャットウィジェットSDK** - 外部Webサイトに埋め込み可能なチャットUI（Next.js + React）
 
-Terao Navi APIを活用したLLMベースの質問応答システムを、あなたのWebサイトに簡単に統合できます。
+`chat.js` を1行読み込むだけで、右下にチャットウィジェットを表示できます。
+ウィジェットは `iframe`（`/widget`）で描画し、API呼び出し（認証/質問送信）は軽量ローダーの `chat.js` が担当します。
 
 ## 目次
 
 - [特徴](#特徴)
-- [デモ](#デモ)
-- [クイックスタート](#クイックスタート)
-- [インストール](#インストール)
-- [使い方](#使い方)
-- [認証情報の設定](#認証情報の設定)
-- [カスタマイズ](#カスタマイズ)
 - [アーキテクチャ](#アーキテクチャ)
-- [API仕様](#api仕様)
+- [クイックスタート](#クイックスタート)
+- [組み込み方法](#組み込み方法)
+- [設定（data属性）](#設定data属性)
 - [開発](#開発)
+- [デプロイ](#デプロイ)
 - [ライセンス](#ライセンス)
 
 ## 特徴
 
-- **簡単な組み込み** - わずか2行のコードで導入可能
-- **モダンな技術スタック** - Next.js 16 + React 19 + TypeScript
-- **レスポンシブデザイン** - デスクトップ・モバイル対応
-- **リアルタイムチャット** - スムーズな会話体験
-- **セキュア** - iframe分離 + Basic認証 + Bearer Token
-- **UXの配慮** - タイピングインジケーター、最小化/最大化機能
-- **高パフォーマンス** - 軽量ローダー（chat.js）
-- **コンポーネント設計** - 保守性の高いReactコンポーネント
-
-## デモ
-
-デモページで実際の動作を確認できます：
-
-```bash
-npm run dev
-```
-
-開発サーバー起動後、ブラウザで以下のURLを開いてください：
-- デモページ: `http://localhost:3000/demo.html`
-- ウィジェットページ: `http://localhost:3000/widget`
-
-## クイックスタート
-
-### 1. プロジェクトのセットアップ
-
-```bash
-# リポジトリをクローン
-git clone <repository-url>
-cd terao_navi_sdk
-
-# 依存関係をインストール
-npm install
-
-# 開発サーバーを起動
-npm run dev
-```
-
-### 2. あなたのHTMLに組み込む
-
-あなたのHTMLファイルに以下のコードを追加するだけで、チャットウィジェットが利用できます：
-
-```html
-<!-- チャットウィジェットを表示する場所 -->
-<div id="terao-navi-chat"></div>
-
-<!-- ウィジェットを読み込むスクリプト -->
-<script
-  src="http://localhost:3000/chat.js"
-  data-company-id="1"
-  data-chat-title="teraid chatへ質問する"
-  data-chat-color="#ea6666ff"
-  data-preview="false"
-></script>
-```
-
-## インストール
-
-### 必要な環境
-
-- Node.js 20.x 以上
-- npm または yarn
-
-### 依存関係
-
-```json
-{
-  "dependencies": {
-    "next": "16.1.3",
-    "react": "19.2.3",
-    "react-dom": "19.2.3"
-  }
-}
-```
-
-## 使い方
-
-### 基本的な使い方
-
-```html
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Website</title>
-</head>
-<body>
-  <h1>Welcome to my website!</h1>
-  
-  <!-- チャットウィジェット -->
-  <div id="terao-navi-chat"></div>
-  <script
-    src="http://localhost:3000/chat.js"
-    data-company-id="1"
-    data-chat-title="teraid chatへ質問する"
-    data-chat-color="#ea6666ff"
-  ></script>
-</body>
-</html>
-```
-
-**本番環境での使用:**
-
-```html
-<script
-  src="https://your-domain.com/chat.js"
-  data-company-id="1"
-  data-chat-title="teraid chatへ質問する"
-  data-chat-color="#ea6666ff"
-  data-preview="false"
-></script>
-```
-
-**プレビューモードでの使用（親要素内に表示）:**
-
-```html
-<!-- チャットウィジェットを表示するコンテナ -->
-<div id="terao-navi-chat" style="width: 100%; max-width: 800px; margin: 0 auto;"></div>
-
-<script
-  src="http://localhost:3000/chat.js"
-  data-company-id="1"
-  data-chat-title="teraid chatへ質問する"
-  data-chat-color="#ea6666ff"
-  data-preview="true"
-></script>
-```
-
-### スクリプトタグの属性
-
-| 属性 | 必須 | 説明 | デフォルト値 |
-|------|------|------|-------------|
-| `src` | ✓ | ウィジェットのJSファイルのURL | - |
-| `data-company-id` | ✓ | 会社ID（数値） | - |
-| `data-chat-title` | - | チャットウィンドウのヘッダータイトル | `'teraid chatへ質問する'` |
-| `data-chat-color` | - | チャットウィンドウのテーマカラー（16進数カラーコード） | `'#ea6666ff'` |
-| `data-preview` | - | プレビューモード。`true`の場合、親要素内に相対配置、`false`の場合は画面右下に固定配置 | `'false'` |
-
-## 設定
-
-### `data-company-id` について
-
-`data-company-id` 属性には、Terao Navi APIで登録された会社IDを数値で設定します。
-
-会社IDは以下のGitHub画面から発行できます（詳しくはリポジトリを確認してください）：
-
-**https://github.com/terao06/terao_navi_web**
-
-この値はHTML上に公開されますが、サーバー側でドメイン制限やその他のセキュリティ対策が実施されています。
-
-#### セキュリティ上の注意
-
-**⚠️ 重要:** 
-- 会社IDはHTMLソースコードに埋め込まれるため、**クライアント側で確認可能**です
-- Terao Navi APIのサーバー側で、**origin/refererによるドメイン制限**が設定されています
-- 本番環境では、**サーバーサイドでの追加のセキュリティ対策**も実施されます
-
-### 認証フロー
-
-```mermaid
-sequenceDiagram
-    participant User as ユーザー
-    participant Widget as ChatWidget
-    participant API as /api/chat
-    participant Client as TeraoNaviClient
-    participant Terao as Terao Navi API
-
-    User->>Widget: メッセージ送信
-    Widget->>API: POST /api/chat
-    API->>Client: ask()呼び出し
-    
-    alt トークンが未発行または期限切れ
-        Client->>Terao: Basic認証でトークン取得
-        Terao-->>Client: access_token + refresh_token
-        Client->>Client: トークンをキャッシュ
-    end
-    
-    Client->>Terao: Bearer認証で質問送信
-    Terao-->>Client: 回答を返却
-    Client-->>API: 回答を返却
-    API-->>Widget: JSON形式で回答
-    Widget-->>User: 回答を表示
-```
-
-すべての認証処理はSDK内部で自動的に行われます。
-
-## カスタマイズ
-
-### チャットウィンドウの外観
-
-`data-chat-color` でテーマカラーを変更できます：
-
-```html
-<script
-  src="http://localhost:3000/chat.js"
-  data-company-id="1"
-  data-chat-title="teraid chatへ質問する"
-  data-chat-color="#ea6666ff"
-></script>
-```
-
-### 高度なカスタマイズ
-
-`public/chat.js` および `components/` ディレクトリのReactコンポーネントを編集することで、より詳細なカスタマイズが可能です。
-
-#### コンポーネント構成
-
-```
-components/
-├── ChatWidget.jsx          # メインコンテナ（状態管理、メッセージ送受信）
-├── ChatHeader.jsx          # ヘッダー（タイトル、最小化/最大化ボタン）
-├── ChatMessages.jsx        # メッセージリスト（スクロール管理、自動スクロール）
-├── ChatMessage.jsx         # 個別メッセージ表示（ユーザー/AI）
-├── ChatInput.jsx           # メッセージ入力フィールド（送信ボタン、Enter送信）
-└── TypingIndicator.jsx     # タイピングアニメーション（3点リーダー）
-```
-
-#### カスタマイズ例
-
-**1. ウィジェットの初期サイズを変更:**
-
-`public/chat.js` の `iframe` スタイルを編集：
-
-```javascript
-iframe.style.width = '400px';  // 幅を変更
-iframe.style.height = '600px'; // 高さを変更
-```
-
-**2. メッセージの表示スタイルを変更:**
-
-`components/ChatMessage.jsx` のスタイルを編集：
-
-```jsx
-// ユーザーメッセージの背景色を変更
-<div style={{ 
-  backgroundColor: isUser ? '#your-color' : '#f3f4f6',
-  // ...
-}}>
-```
-
-**3. プレースホルダーテキストを変更:**
-
-`components/ChatInput.jsx` を編集：
-
-```jsx
-<input
-  placeholder="ここにカスタムメッセージ..."
-  // ...
-/>
-```
+- **簡単導入** - HTMLに `script` タグを追加するだけ
+- **UIはiframe分離** - 既存サイトのCSS/JSと干渉しにくい
+- **軽量ローダー** - `public/chat.js` が埋め込みとAPI通信を担当
+- **postMessage連携** - 親（埋め込み側）↔ 子（iframe）で状態同期
+- **カスタマイズ** - タイトル/テーマ色/表示モード（プレビュー）をdata属性で指定
+- **Next.js** - `next dev` / `next build` / `next start` に対応
 
 ## アーキテクチャ
 
-### 全体構成
+### システム全体構成
 
 ```mermaid
-graph TB
-    subgraph "外部Webサイト"
-        HTML[HTMLページ]
-        ChatJS[chat.js]
-        IFrame[iframe]
-    end
-    
-    subgraph "Next.js Server"
-        Widget[widget ページ]
-        ChatAPI[api/chat]
-        Client[TeraoNaviClient]
-    end
-    
-    subgraph "Terao Navi API"
-        AuthAPI[認証API]
-        QuestionAPI[質問API]
-        LLM[LLMエンジン]
-    end
-    
-    HTML -->|読み込み| ChatJS
-    ChatJS -->|生成| IFrame
-    IFrame -->|アクセス| Widget
-    Widget -->|POST| ChatAPI
-    ChatAPI -->|使用| Client
-    Client -->|Basic認証| AuthAPI
-    AuthAPI -->|トークン発行| Client
-    Client -->|Bearer認証| QuestionAPI
-    QuestionAPI -->|処理| LLM
-    LLM -->|回答| QuestionAPI
-    QuestionAPI -->|返却| Client
-    Client -->|返却| ChatAPI
-    ChatAPI -->|JSON| Widget
-    Widget -->|表示| IFrame
+flowchart LR
+  %% ========== 外部Webサイト ==========
+  subgraph EXT["外部Webサイト"]
+    direction TB
+    Host["埋め込み先ページ<br/>(Host HTML)"]:::host
+    Script["&lt;script src='/chat.js' ...&gt;"]:::host
+  end
+
+  %% ========== SDK (Next.js) ==========
+  subgraph SDK["Terao Navi SDK（Next.js）"]
+    direction TB
+    Static["/chat.js<br/>（static asset）"]:::asset
+    Loader["chat.js（Loader）<br/>・DOM挿入<br/>・iframe生成<br/>・API fetch<br/>・postMessage中継"]:::loader
+    Widget["/widget<br/>（iframe UI / React）"]:::ui
+  end
+
+  %% ========== API ==========
+  subgraph API["Terao Navi API"]
+    direction TB
+    Auth["/auth/token<br/>/auth/refresh"]:::api
+    Ask["/ask"]:::api
+  end
+
+  %% ======= フロー（矢印を整理）=======
+  Script -->|"① 読み込み（script src）"| Static
+  Static -->|"② 実行"| Loader
+  Loader -->|"③ iframe表示"| Widget
+
+  Loader -->|"④ 認証（fetch）"| Auth
+  Loader -->|"⑤ 質問送信（fetch）"| Ask
+
+  Loader <-->|"⑥ 状態同期（postMessage）"| Widget
+
+  %% ======= styles =======
+  classDef host fill:#F3F4F6,stroke:#6B7280,color:#111827
+  classDef asset fill:#EEF2FF,stroke:#4F46E5,color:#111827
+  classDef loader fill:#FFF7ED,stroke:#C2410C,color:#111827
+  classDef ui fill:#ECFDF5,stroke:#059669,color:#111827
+  classDef api fill:#EFF6FF,stroke:#2563EB,color:#111827
 ```
 
-システムは3つの主要なレイヤーで構成されています：
+### 役割分担
 
-1. **外部Webサイト層**: クライアントのHTMLにウィジェットを埋め込み
-2. **Next.jsサーバー層**: ウィジェットのレンダリングとAPI処理
-3. **Terao Navi API層**: LLMベースの質問応答処理
+- `public/chat.js`
+  - DOMにウィジェットを挿入（`#terao-navi-chat` を作成/再利用）
+  - `iframe` で `/widget` を表示
+  - APIへの `fetch`（認証・質問送信）
+  - `postMessage` でUI（iframe）とメッセージ/typing/最小化を同期
+- `app/widget/page.tsx`
+  - `title` / `color` をクエリから受け取りウィジェットUIへ反映
+- `components/*`
+  - Reactコンポーネント群（ヘッダー、メッセージ、入力欄など）
 
-### データフロー
+## クイックスタート
 
-1. **ユーザー** が外部サイトのチャットウィジェットにメッセージを入力
-2. **chat.js** がiframeを生成し、`/widget`ページを読み込み
-3. **ChatWidget** コンポーネントがメッセージを `/api/chat` に送信
-4. **API Route** が `TeraoNaviClient` を使ってTerao Navi APIを呼び出し
-5. **Terao Navi API** がLLMで回答を生成して返却
-6. **ChatWidget** が回答をユーザーに表示
+### 前提条件
 
-### セキュリティ設計
+- Node.js（推奨: LTS）
+- npm
+- 連携先の **Terao Navi API**（別リポジトリ）
 
-- **iframe分離:** ウィジェットは独立したiframe内で動作し、親ページとのスコープを分離
-- **Basic認証:** clientIdとclientSecretによる初回認証
-- **Bearer Token:** セッション中はトークンベースの認証を使用
-- **Origin/Referer自動送信:** APIサーバー側でドメイン検証可能
-- **トークンキャッシュ:** サーバーサイドでトークンを管理（クライアント側に露出しない）
+### ローカル起動
 
-## API仕様
+```powershell
+# 依存関係インストール
+npm install
 
-### Terao Navi API
-
-このSDKは、**Terao Navi API** を利用して質問応答機能を提供しています。
-
-API側の詳細な仕様については、以下のリポジトリで確認できます：
-
-**https://github.com/terao06/terao_navi_api**
-
-### SDK内部API
-
-#### POST `/api/chat`
-
-チャット用の内部APIエンドポイント。
-
-**リクエスト:**
-```json
-{
-  "message": "質問内容",
-  "company_id": 1,
-  "origin": "埋め込み元のorigin",
-  "referer": "埋め込み元のフルURL",
-  "application_id": 1
-}
+# 開発サーバー起動
+npm run dev
 ```
 
-**レスポンス（成功）:**
-```json
-{
-  "success": true,
-  "response": "AIからの回答",
-  "timestamp": "2026-01-18T12:34:56.789Z"
-}
+既定では `http://localhost:3000` で起動します。
+
+### デモページ
+
+開発サーバー起動後、次を開くと埋め込み動作を確認できます。
+
+- `http://localhost:3000/demo.html`
+
+## 組み込み方法
+
+埋め込み先のHTMLに以下を追加します。
+
+```html
+<div id="terao-navi-chat"></div>
+<script
+  src="https://YOUR_SDK_DOMAIN/chat.js"
+  data-company-id="1"
+></script>
 ```
 
-**レスポンス（エラー）:**
-```json
-{
-  "error": "エラーメッセージ"
-}
-```
+- `div#terao-navi-chat` は省略可能です（存在しない場合は `chat.js` が自動生成します）
+- 本番では `YOUR_SDK_DOMAIN` を実際の配信先に置き換えてください
+
+## 設定（data属性）
+
+`<script src=".../chat.js" ...>` に以下の属性を設定できます。
+
+| 属性 | 必須 | 説明 | 例 |
+|---|---:|---|---|
+| `data-company-id` | ✅ | 企業ID（認証に使用） | `"1"` |
+| `data-application-id` |  | アプリケーションID（質問送信に付与） | `"2"` |
+| `data-chat-title` |  | ランチャー/ヘッダー表示名 | `"AIに質問"` |
+| `data-chat-color` |  | テーマ色（UIのアクセント） | `"#ea6666"` |
+| `data-preview` |  | `true` の場合は固定表示（プレビュー用途） | `"true"` |
+
+### API Base URLについて
+
+`public/chat.js` 内の `apiBaseUrl` が現在 **`http://localhost:8005` に固定**されています。
+環境に合わせて変更してください（将来的に `data-api-base-url` での指定に対応する想定のコメントがありますが、現状コード上は未反映です）。
 
 ## 開発
 
-### 開発サーバーの起動
+### 主なコマンド
 
-```bash
-# 開発モードで起動
-npm run dev
-
-# または
-npm run dev -- -p 3001  # ポート番号を指定
+```powershell
+npm run dev      # 開発サーバー
+npm run build    # ビルド
+npm run start    # 本番起動
+npm run lint     # ESLint
 ```
 
-`http://localhost:3000` でアプリケーションが起動します。
+### CORSについて
 
-### ビルド
+`next.config.ts` で `/chat.js` と `/api/*` に対してCORSヘッダーを付与しています。
+外部サイトから `chat.js` を読み込む用途を想定しています。
 
-```bash
-# プロダクションビルド
-npm run build
+## デプロイ
 
-# ビルド後のアプリケーションを起動
-npm run start
-```
+一般的なNext.jsアプリと同様にデプロイできます。
 
-### その他のコマンド
+- Vercel / Cloud Run / ECS などにデプロイ
+- `next build` → `next start`
+- `public/chat.js` を外部サイトが参照できるように配信
 
-```bash
-# リンターチェック
-npm run lint
-
-# 型チェック
-npx tsc --noEmit
-```
-
-### プロジェクト構造
-
-```
-terao_navi_sdk/
-├── app/
-│   ├── api/
-│   │   └── chat/
-│   │       └── route.ts          # チャットAPI
-│   ├── widget/
-│   │   ├── layout.jsx            # ウィジェットレイアウト
-│   │   └── page.jsx              # ウィジェットページ
-│   ├── globals.css
-│   ├── layout.tsx
-│   └── page.tsx
-├── components/
-│   ├── ChatWidget.jsx            # メインウィジェット
-│   ├── ChatHeader.jsx            # ヘッダー
-│   ├── ChatMessages.jsx          # メッセージリスト
-│   ├── ChatMessage.jsx           # 個別メッセージ
-│   ├── ChatInput.jsx             # 入力フィールド
-│   └── TypingIndicator.jsx       # タイピング表示
-├── lib/
-│   ├── api/
-│   │   └── teraoNaviClient.ts    # Terao Navi APIクライアント
-│   └── hooks/
-│       └── useTeraoNavi.ts       # カスタムフック
-├── public/
-│   ├── chat.js                   # 外部サイト用ローダー
-│   ├── demo.html                 # デモページ
-│   └── icons/
-├── package.json
-├── next.config.ts
-├── tsconfig.json
-└── README.md
-```
-
-### TeraoNaviClient
-
-`lib/api/teraoNaviClient.ts` は、Terao Navi APIとの通信を抽象化したクライアントクラスです。
-
-**主な機能:**
-- 2段階認証（Basic → Bearer Token）
-- トークン自動管理（発行・更新・キャッシュ）
-- リフレッシュトークンによる自動更新
-- エラーハンドリング
-- TypeScriptサポート
-
-**使用例:**
-```typescript
-import { TeraoNaviClient } from '@/lib/api/teraoNaviClient';
-
-// クライアントインスタンスを作成
-const client = new TeraoNaviClient({
-  company_id: 1,                            // 会社ID
-  origin: 'https://example.com',            // 埋め込み元のorigin
-  referer: 'https://example.com/page',      // 埋め込み元のフルURL
-  autoRefresh: true,                        // トークン自動更新を有効化
-});
-
-// 質問を送信
-const response = await client.ask({
-  question: 'こんにちは',
-  application_id: 1,
-});
-
-console.log(response.data.answer);  // AIの回答を取得
-```
-
-**エラーハンドリング:**
-```typescript
-try {
-  const response = await client.ask({
-    question: 'こんにちは',
-    application_id: 1,
-  });
-  console.log(response.data.answer);
-} catch (error) {
-  if (error.response?.status === 401) {
-    console.error('認証エラー: company_idを確認してください');
-  } else if (error.response?.status === 429) {
-    console.error('レート制限: しばらく待ってから再試行してください');
-  } else {
-    console.error('エラーが発生しました:', error.message);
-  }
-}
-```
-
-## 環境変数
-
-必要に応じて `.env.local` ファイルで設定可能：
-
-```env
-# Terao Navi APIのベースURL
-NEXT_PUBLIC_API_BASE_URL=https://your-api-domain.com
-```
-
-## パフォーマンス最適化
-
-- **chat.js の軽量化**: 必要最小限のコードのみを含めています（約2KB）
-- **iframe の遅延読み込み**: ユーザーがウィジェットを開くまで読み込みを遅延
-- **トークンキャッシュ**: 認証トークンをメモリにキャッシュしてAPIコール削減
-- **React 19**: 最新のReact Server Componentsとパフォーマンス最適化
-
-## ブラウザサポート
-
-- Chrome 90+
-- Firefox 88+
-- Safari 14+
-- Edge 90+
-
-**注意:** IE11はサポートしていません。
+> 注意: 連携先のTerao Navi API側でも、Originチェックなどのセキュリティ要件を満たす必要があります。
 
 ## ライセンス
 
-このプロジェクトはMITライセンスの下でライセンスされています。詳細は [LICENSE](LICENSE) ファイルをご覧ください。
-
-## 貢献
-
-プルリクエストを歓迎します！大きな変更の場合は、まずissueを開いて変更内容を議論してください。
-
-### 貢献の流れ
-
-1. このリポジトリをフォーク
-2. フィーチャーブランチを作成 (`git checkout -b feature/amazing-feature`)
-3. 変更をコミット (`git commit -m 'Add some amazing feature'`)
-4. ブランチにプッシュ (`git push origin feature/amazing-feature`)
-5. プルリクエストを作成
+MIT License. 詳細は `LICENSE` を参照してください。

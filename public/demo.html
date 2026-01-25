@@ -116,12 +116,11 @@
       </ul>
       
       <h2>🏗️ アーキテクチャ</h2>
-      <p>このチャットウィジェットは、モダンなアーキテクチャで設計されています：</p>
+      <p>このチャットウィジェットは、役割を分けて設計されています：</p>
       <ul style="line-height: 1.8; color: #666;">
-        <li><strong>chat.js</strong> - 軽量なローダー（外部サイトに読み込まれる）</li>
-        <li><strong>Next.js</strong> - サーバーサイドレンダリングとAPIルート</li>
-        <li><strong>React (JSX)</strong> - コンポーネント化されたUI</li>
-        <li><strong>iframe</strong> - セキュアな分離環境</li>
+        <li><strong>chat.js</strong> - 軽量なローダー + API(fetch)担当（認証/ask）</li>
+        <li><strong>/widget</strong> - Next.js + React で描画するUI（iframe内）</li>
+        <li><strong>postMessage</strong> - chat.js と /widget のメッセージ連携</li>
       </ul>
       
       <h2>📦 コンポーネント構成</h2>
@@ -144,7 +143,8 @@
     <!-- terao-navi チャットウィジェットを組み込む -->
     <script
       src="http://localhost:3000/chat.js"
-      data-company-id=1
+      data-company-id="1"
+      data-application-id="2"
       data-chat-title="teraid chatへ質問する"
       data-chat-color="#ea6666ff"
     ></script>
