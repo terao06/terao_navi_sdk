@@ -9,7 +9,6 @@
  * Attributes:
  * - data-company-id: 企業ID（必須）
  * - data-application-id: アプリケーションID（任意）
- * - data-api-base-url: Terao Navi API Base URL（任意）例: https://api.example.com
  * - data-chat-title: タイトル（任意）
  * - data-chat-color: テーマ色（任意）例: #ea6666
  * - data-preview: true の場合は埋め込み表示（固定表示しない）
@@ -31,7 +30,7 @@
   const initialGreeting = 'こんにちは！何かお手伝いできることはありますか？';
 
   const state = {
-    isMinimized: !isPreview,
+    isMinimized: true,
     isTyping: false,
     messages: [
       {
@@ -45,29 +44,17 @@
   };
 
   const ROOT_ID = 'terao-navi-chat';
+  const PREVIEW_ROOT_ATTR = 'data-terao-navi-preview-root';
   const SDK_ORIGIN = getBaseOriginFromScriptSrc(currentScript.src);
   const widgetUrl = buildWidgetUrl(SDK_ORIGIN, chatTitle, chatColor, isPreview);
-  const widgetOrigin = widgetUrl ? new URL(widgetUrl).origin : null;
+  // Note: the iframe may be redirected/reverse-proxied to a different origin.
+  // We learn the real origin from postMessage events coming from the iframe.
+  let widgetOrigin = widgetUrl ? new URL(widgetUrl).origin : null;
   const displayTitle = chatTitle || 'terao-navi チャット';
   const themeBackground = chatColor ? chatColor : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
 
   function safeNowId() {
     return Date.now() + Math.floor(Math.random() * 1000);
-  }
-
-  function isValidUrl(url) {
-    try {
-      const parsed = new URL(url);
-      return parsed.protocol === 'http:' || parsed.protocol === 'https:';
-    } catch {
-      return false;
-    }
-  }
-
-  function normalizeApiBaseUrl(url) {
-    if (!url) return '';
-    if (!isValidUrl(url)) return '';
-    return String(url).replace(/\/$/, '');
   }
 
   function getBaseOriginFromScriptSrc(src) {
@@ -226,9 +213,11 @@
 
   function postToWidget(iframeEl, message) {
     if (!iframeEl || !iframeEl.contentWindow) return;
-    if (!widgetOrigin) return;
+    // Use learned origin when available; fall back to '*' so the iframe can receive
+    // the message even if it was redirected to a different origin.
+    const targetOrigin = widgetOrigin || '*';
     try {
-      iframeEl.contentWindow.postMessage(message, widgetOrigin);
+      iframeEl.contentWindow.postMessage(message, targetOrigin);
     } catch {
       // ignore
     }
@@ -250,6 +239,10 @@
 
   function setMinimized(rootEl, iframeEl, launcherBtn, minimized) {
     state.isMinimized = !!minimized;
+    if (rootEl) {
+      if (state.isMinimized) rootEl.classList.add('tn_minimized');
+      else rootEl.classList.remove('tn_minimized');
+    }
     if (state.isMinimized) {
       iframeEl.classList.add('tn_hidden');
       if (launcherBtn) launcherBtn.classList.remove('tn_hidden');
@@ -259,62 +252,124 @@
     }
   }
 
-  function injectStyles() {
-    const style = document.createElement('style');
-    style.textContent = isPreview
-      ? `
-        #${ROOT_ID}{position:relative;width:400px;height:600px;max-width:100%;max-height:80vh;z-index:1;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;}
-        #${ROOT_ID} .tn_iframe{width:100%;height:100%;border:none;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.15);background:#fff;overflow:hidden;transition:transform .3s ease,box-shadow .3s ease;transform:translateY(0);will-change:transform,box-shadow;}
-        #${ROOT_ID} .tn_iframe:hover{transform:translateY(-8px);box-shadow:0 16px 48px rgba(0,0,0,.25);}
-        #${ROOT_ID} .tn_hidden{display:none !important;}
-      `
-      : `
-        #${ROOT_ID}{position:fixed;right:20px;bottom:20px;z-index:9999;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;}
-        #${ROOT_ID} .tn_launcher{padding:14px 32px;border-radius:30px;background:${themeBackground};color:#fff;border:none;box-shadow:0 4px 16px rgba(0,0,0,.2);cursor:pointer;font-size:16px;font-weight:600;letter-spacing:.3px;transition:transform .3s ease,box-shadow .3s ease,filter .3s ease;line-height:1;}
-        #${ROOT_ID} .tn_launcher:hover{transform:translateY(-8px);box-shadow:0 12px 40px rgba(0,0,0,.3);filter:brightness(1.02);}
-        #${ROOT_ID} .tn_launcher:active{transform:scale(.98);}
-        #${ROOT_ID} .tn_iframe{width:400px;height:600px;border:none;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.15);background:#fff;overflow:hidden;transition:transform .3s ease,box-shadow .3s ease;transform:translateY(0);will-change:transform,box-shadow;}
-        #${ROOT_ID} .tn_iframe:hover{transform:translateY(-8px);box-shadow:0 16px 48px rgba(0,0,0,.25);}
-        #${ROOT_ID} .tn_hidden{display:none !important;}
-      `;
-    document.head.appendChild(style);
+  function getCacheBusterFromScriptSrc(src) {
+    try {
+      const u = new URL(src, window.location.href);
+      return u.searchParams.get('v') || '';
+    } catch {
+      return '';
+    }
+  }
+
+  function injectStylesheet() {
+    const LINK_ID = 'terao-navi-chat-css';
+    if (document.getElementById(LINK_ID)) return;
+
+    let cssUrl;
+    try {
+      const base = SDK_ORIGIN || window.location.origin;
+      cssUrl = new URL('/chat.css', base);
+      const v = getCacheBusterFromScriptSrc(currentScript.src);
+      if (v) cssUrl.searchParams.set('v', v);
+    } catch {
+      return;
+    }
+
+    const link = document.createElement('link');
+    link.id = LINK_ID;
+    link.rel = 'stylesheet';
+    link.href = cssUrl.toString();
+    document.head.appendChild(link);
   }
 
   function init() {
-    injectStyles();
+    injectStylesheet();
 
-    let root = document.getElementById(ROOT_ID);
-    if (!root) {
-      root = document.createElement('div');
-      root.id = ROOT_ID;
-      document.body.appendChild(root);
+    let root;
+    if (isPreview) {
+      const mountEl = currentScript.parentElement || document.body;
+      // In preview pages, host CSS often targets #terao-navi-chat and its descendants.
+      // Use a dedicated class-based root scoped to the mount element to avoid interference.
+      root = mountEl.querySelector(`[${PREVIEW_ROOT_ATTR}="true"]`);
+      if (!root) {
+        root = document.createElement('div');
+        root.className = 'tn_preview_root';
+        root.setAttribute(PREVIEW_ROOT_ATTR, 'true');
+        mountEl.appendChild(root);
+      } else {
+        // Re-render if the preview script is injected multiple times
+        root.classList.add('tn_preview_root');
+        root.innerHTML = '';
+      }
+
+      // Ensure positioning context for absolute launcher
+      try {
+        const cs = window.getComputedStyle(mountEl);
+        if (cs.position === 'static') {
+          mountEl.style.setProperty('position', 'relative', 'important');
+        }
+      } catch {
+        // ignore
+      }
     } else {
-      // 二重挿入防止
-      if (root.getAttribute('data-terao-navi-initialized') === 'true') return;
+      root = document.getElementById(ROOT_ID);
+      if (!root) {
+        root = document.createElement('div');
+        root.id = ROOT_ID;
+        document.body.appendChild(root);
+      } else {
+        // 二重挿入防止
+        if (root.getAttribute('data-terao-navi-initialized') === 'true') return;
+      }
+      root.setAttribute('data-terao-navi-initialized', 'true');
     }
-    root.setAttribute('data-terao-navi-initialized', 'true');
+
+    // Theme (dynamic) - provided via CSS custom property
+    try {
+      root.style.setProperty('--tn-theme-bg', themeBackground);
+    } catch {
+      // ignore
+    }
 
     const iframeEl = document.createElement('iframe');
-    iframeEl.className = isPreview ? 'tn_iframe' : 'tn_iframe tn_hidden';
+    iframeEl.className = state.isMinimized ? 'tn_iframe tn_hidden' : 'tn_iframe';
     iframeEl.src = widgetUrl;
     iframeEl.setAttribute('title', 'Terao Navi Chat Widget');
     iframeEl.setAttribute('loading', 'lazy');
 
-    let launcherBtn = null;
-    if (!isPreview) {
-      launcherBtn = document.createElement('button');
-      launcherBtn.type = 'button';
-      launcherBtn.className = 'tn_launcher';
-      launcherBtn.setAttribute('aria-label', 'Open chat');
-      launcherBtn.textContent = displayTitle;
-      launcherBtn.addEventListener('click', () => setMinimized(root, iframeEl, launcherBtn, false));
-      root.appendChild(launcherBtn);
+    const launcherBtn = document.createElement('button');
+    launcherBtn.type = 'button';
+    launcherBtn.className = isPreview ? 'tn_preview_launcher' : 'tn_launcher';
+    if (!state.isMinimized) {
+      launcherBtn.classList.add('tn_hidden');
     }
+    launcherBtn.setAttribute('aria-label', 'Open chat');
+    launcherBtn.textContent = displayTitle;
+    if (isPreview) {
+      // Force the launcher to bottom-right within the preview area.
+      launcherBtn.style.setProperty('position', 'absolute', 'important');
+      launcherBtn.style.setProperty('inset', 'auto 16px 16px auto', 'important');
+      launcherBtn.style.setProperty('right', '16px', 'important');
+      launcherBtn.style.setProperty('left', 'auto', 'important');
+      launcherBtn.style.setProperty('top', 'auto', 'important');
+      launcherBtn.style.setProperty('bottom', '16px', 'important');
+      launcherBtn.style.setProperty('margin', '0', 'important');
+      launcherBtn.style.setProperty('transform', 'none', 'important');
+    }
+    launcherBtn.addEventListener('click', () => setMinimized(root, iframeEl, launcherBtn, false));
+    root.appendChild(launcherBtn);
 
     root.appendChild(iframeEl);
 
     window.addEventListener('message', async (ev) => {
-      if (!widgetOrigin || ev.origin !== widgetOrigin) return;
+      // Only accept messages coming from our iframe.
+      if (!ev || ev.source !== iframeEl.contentWindow) return;
+
+      // If the iframe is served from a different origin (redirect/proxy), update it.
+      if (ev.origin && widgetOrigin !== ev.origin) {
+        widgetOrigin = ev.origin;
+      }
+
       const data = ev.data;
       if (!data || typeof data !== 'object' || !data.type) return;
 
@@ -362,10 +417,8 @@
     });
 
     // 初期表示状態
-    if (!isPreview && launcherBtn) {
-      setMinimized(root, iframeEl, launcherBtn, state.isMinimized);
-    } else {
-      // previewは常に表示
+    setMinimized(root, iframeEl, launcherBtn, state.isMinimized);
+    if (isPreview) {
       postToWidget(iframeEl, { type: 'TERAO_NAVI_STATE', payload: { messages: state.messages.slice(), isTyping: state.isTyping } });
     }
   }

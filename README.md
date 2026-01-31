@@ -139,7 +139,6 @@ npm run dev
 ### API Base URLについて
 
 `public/chat.js` 内の `apiBaseUrl` が現在 **`http://localhost:8005` に固定**されています。
-環境に合わせて変更してください（将来的に `data-api-base-url` での指定に対応する想定のコメントがありますが、現状コード上は未反映です）。
 
 ## 開発
 

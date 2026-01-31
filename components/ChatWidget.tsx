@@ -18,7 +18,8 @@ export default function ChatWidget({
 
   function postToParent(msg: WidgetToParentMessage) {
     try {
-      window.parent?.postMessage(msg);
+      // Parent側(chat.js)で origin を検証しているため、ここは確実に届くよう '*' で送る
+      window.parent?.postMessage(msg, "*");
     } catch {
       // ignore
     }

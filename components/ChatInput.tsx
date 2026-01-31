@@ -110,6 +110,9 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: "14px",
     transition: "border-color 0.3s ease",
     backgroundColor: "#fafafa",
+    color: "#111111",
+    caretColor: "#111111",
+    opacity: 1,
   },
   button: {
     padding: "12px 16px",

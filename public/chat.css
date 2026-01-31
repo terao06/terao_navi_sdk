@@ -1,0 +1,106 @@
+/* terao-navi chat widget styles (loaded by public/chat.js) */
+
+:root{
+  --tn-theme-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --tn-font: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+}
+
+/* Preview (embedded) */
+.tn_preview_root{
+  position:relative;
+  display:block;
+  width:400px;
+  height:600px;
+  max-width:100%;
+  max-height:80vh;
+  margin-left:auto !important;
+  margin-right:0 !important;
+  z-index:1;
+  font-family:var(--tn-font);
+}
+
+.tn_preview_launcher{
+  position:absolute !important;
+  inset:auto 16px 16px auto !important;
+  right:16px !important;
+  left:auto !important;
+  top:auto !important;
+  bottom:16px !important;
+  margin:0 !important;
+  transform:none !important;
+  padding:12px 20px;
+  border-radius:24px;
+  background:var(--tn-theme-bg);
+  color:#fff;
+  border:none;
+  box-shadow:0 4px 16px rgba(0,0,0,.2);
+  cursor:pointer;
+  font-size:14px;
+  font-weight:600;
+  letter-spacing:.2px;
+  transition:transform .3s ease,box-shadow .3s ease,filter .3s ease;
+  line-height:1;
+  z-index:100000;
+}
+.tn_preview_launcher:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,.3);filter:brightness(1.02);}
+.tn_preview_launcher:active{transform:scale(.98);}
+
+.tn_preview_root .tn_iframe{
+  width:100%;
+  height:100%;
+  border:none;
+  border-radius:16px;
+  box-shadow:0 8px 32px rgba(0,0,0,.15);
+  background:#fff;
+  overflow:hidden;
+  transition:transform .3s ease,box-shadow .3s ease;
+  transform:translateY(0);
+  will-change:transform,box-shadow;
+}
+.tn_preview_root .tn_iframe:hover{transform:translateY(-8px);box-shadow:0 16px 48px rgba(0,0,0,.25);}
+.tn_preview_root .tn_hidden{display:none !important;}
+
+/* Normal (floating) */
+#terao-navi-chat{
+  position:fixed;
+  right:20px;
+  bottom:20px;
+  z-index:9999;
+  font-family:var(--tn-font);
+}
+
+#terao-navi-chat .tn_launcher{
+  padding:14px 32px;
+  border-radius:30px;
+  background:var(--tn-theme-bg);
+  color:#fff;
+  border:none;
+  box-shadow:0 4px 16px rgba(0,0,0,.2);
+  cursor:pointer;
+  font-size:16px;
+  font-weight:600;
+  letter-spacing:.3px;
+  transition:transform .3s ease,box-shadow .3s ease,filter .3s ease;
+  line-height:1;
+}
+#terao-navi-chat .tn_launcher:hover{transform:translateY(-8px);box-shadow:0 12px 40px rgba(0,0,0,.3);filter:brightness(1.02);}
+#terao-navi-chat .tn_launcher:active{transform:scale(.98);}
+
+#terao-navi-chat .tn_iframe{
+  width:400px;
+  height:600px;
+  /* Normal mode only: responsive height */
+  height:min(clamp(420px, 70vh, 720px), calc(100vh - 40px));
+  max-height:calc(100vh - 40px);
+
+  border:none;
+  border-radius:16px;
+  box-shadow:0 8px 32px rgba(0,0,0,.15);
+  background:#fff;
+  overflow:hidden;
+  transition:transform .3s ease,box-shadow .3s ease;
+  transform:translateY(0);
+  will-change:transform,box-shadow;
+}
+#terao-navi-chat .tn_iframe:hover{transform:translateY(-8px);box-shadow:0 16px 48px rgba(0,0,0,.25);}
+#terao-navi-chat .tn_hidden{display:none !important;}
